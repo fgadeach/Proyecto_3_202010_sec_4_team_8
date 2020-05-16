@@ -1,10 +1,11 @@
 package test.data_structures;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Iterator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import model.data_structures.*;
 
