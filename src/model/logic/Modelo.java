@@ -318,8 +318,9 @@ public class Modelo {
 				"    });\n");
 		Iterator<String> iter = Graph.iterarArcos();
 
-		while(iter.hasNext())
+		while(iter.hasNext() && contador>0)
 		{	
+			
 
 			String act = iter.next();
 			String info[] = act.split("-");
@@ -327,19 +328,33 @@ public class Modelo {
 			Indicador sup1 = Graph.getInfoVertex(Integer.parseInt(info[0]));
 			Indicador sup2 = Graph.getInfoVertex(Integer.parseInt(info[1]));
 			
-			pr.println("var flightPlanCoordinates = [\r\n" + 
-				"    {lat:"+ sup1.darLatitud() +", lng:"+ sup1.darLongitud()+"},\r\n" +  
-				"    {lat:"+ sup2.darLatitud()+", lng:"+ sup2.darLongitud()+"}\r\n" + 
-					"  ];");
-			pr.println("var flightPath = new google.maps.Polyline({\r\n" + 
-					"    path: flightPlanCoordinates,\r\n" + 
-					"    geodesic: true,\r\n" + 
-					"    strokeColor: '#FF0000',\r\n" + 
-					"    strokeOpacity: 1.0,\r\n" + 
-					"    strokeWeight: 1.0\r\n" + 
-					"  });\r\n" + 
-					"\r\n" + 
-					"  flightPath.setMap(map);");
+//			pr.println("var flightPlanCoordinates = [\r\n" + 
+//				"    {lat:"+ sup1.darLatitud() +", lng:"+ sup1.darLongitud()+"},\r\n" +  
+//				"    {lat:"+ sup2.darLatitud()+", lng:"+ sup2.darLongitud()+"}\r\n" + 
+//					"  ];");
+//			pr.println("var flightPath = new google.maps.Polyline({\r\n" + 
+//					"    path: flightPlanCoordinates,\r\n" + 
+//					"    geodesic: true,\r\n" + 
+//					"    strokeColor: '#FF0000',\r\n" + 
+//					"    strokeOpacity: 1.0,\r\n" + 
+//					"    strokeWeight: 1.0\r\n" + 
+//					"  });\r\n" + 
+//					"\r\n" + 
+//					"  flightPath.setMap(map);");
+			
+			pr.println(
+					"          var cityCircle = new google.maps.Circle({\r\n" + 
+					"            strokeColor: '#FF0000',\r\n" + 
+					"            strokeOpacity: 0.8,\r\n" + 
+					"            strokeWeight: 2,\r\n" + 
+					"            fillColor: '#FF0000',\r\n" + 
+					"            fillOpacity: 0.35,\r\n" + 
+					"            map: map,\r\n" + 
+					"            center: {lat:"+sup1.darLatitud()+",lng:"+sup1.darLongitud()+"},\r\n" + 
+					"            radius: 10\r\n" + 
+					"          });\r\n"+
+					"cityCircle.setMap(map);");
+			contador--;
 		}
 		
 		pr.println("}\n");
