@@ -15,13 +15,12 @@ public class Comparendos implements Comparable<Comparendos>
 	private String MUNICIPIO = "";
 	private String TYPE_GEO = "";
 	private String COORDINATES = "";
+	
+	double latitud;
+	double longitud;
 
-	private int DIA = 0;
-	private int MES = 0;
-	private int ANIO = 0;
 
-
-	public Comparendos( String tipo, int id, String fecha, String medio ,String clase, String tipoS, String infraccion ,String descripcion, String localidad, String municipio,String tipoGeo, String coordenadas, int dia, int mes,int anio)
+	public Comparendos( String tipo, int id, String fecha, String medio ,String clase, String tipoS, String infraccion ,String descripcion, String localidad, String municipio,String tipoGeo, String coordenadas)
 	{
 		TYPE = tipo;
 		OBJECTID = id;
@@ -35,9 +34,7 @@ public class Comparendos implements Comparable<Comparendos>
 		MUNICIPIO = municipio;
 		TYPE_GEO = tipoGeo;
 		COORDINATES = coordenadas;
-		DIA = dia;
-		MES = mes;
-		ANIO=anio;
+	
 	}
 
 	public String getTYPE() {
@@ -135,6 +132,29 @@ public class Comparendos implements Comparable<Comparendos>
 	public void setCOORDINATES(String cOORDINATES) {
 		COORDINATES = cOORDINATES;
 	}
+	
+	public double darLatitud() 
+	{
+		return latitud;
+	}
+	
+	public double darLongitud() 
+	{
+		return longitud;
+	}
+	
+	public void setLatitudyLongitud() 
+	{
+		
+		String[] parts = COORDINATES.split(",");
+
+		String part1 = parts[0];
+		longitud = Double.parseDouble(part1.replaceAll("\\[",""));
+
+		String part2 = parts[1];
+		latitud = Double.parseDouble(part2.replaceAll("\\[",""));
+	}
+	
 
 	@Override
 	public int compareTo(Comparendos o) {
@@ -159,33 +179,4 @@ public class Comparendos implements Comparable<Comparendos>
 		}
 		return resp;
 	}
-
-
-	public int getDia() 
-	{
-		
-		return DIA;
-		
-	}
-	public int getMes() 
-	{
-
-		return MES;
-	}
-	public int getAnio() 
-	{
-		
-		return ANIO;
-	}
-	public void setDIA(int Dias) {
-		DIA = Dias;
-	}
-	public void setMes(int Mes) {
-		MES = Mes;
-	}
-	public void setAnio(int anio) {
-		ANIO = anio;
-	}
-	
-
 }

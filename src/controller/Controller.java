@@ -28,6 +28,7 @@ public class Controller {
 	private View view;
 
 	public static final String RUTA_ARCOS="./data/bogota_arcos.txt";
+	public static final String RUTA_COMPARENDOS="./data/Comparendos_DEI_2018_Bogotá_D.C_small_50000_sorted.geojson";
 	public static final String RUTA_NODOS="./data/bogota_vertices.txt";
 	public static final String jsonAV="./data/grafo.geojson";
 	public static final String POLICIA="./data/estacionpolicia.geojson";
@@ -45,6 +46,7 @@ public class Controller {
 	@SuppressWarnings("null")
 	public void run() 
 	{
+		int s =0;
 		Scanner lector = new Scanner(System.in);
 		boolean fin = false;
 
@@ -58,21 +60,27 @@ public class Controller {
 				modelo = new Modelo(); 
 				try {
 					modelo.loadData();
+					modelo.cargarGraph();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no carga");
 				}
-				try {
-					modelo.dibujarGraph();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					System.out.println("no dibuja");
-				}
-				break;
 
 			case 1:
 				try {
 					modelo.cargarGraph();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("no carga el grafo");
+				}
+				break;
+				
+			case 2:
+				try {
+					modelo.loadComparendos(RUTA_COMPARENDOS);
+					System.out.println("--------- \nm Comparendos: ");
+					s = lector.nextInt();
+					modelo.redComunicacion(s);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no carga el grafo");

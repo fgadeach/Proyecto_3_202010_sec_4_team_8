@@ -1,7 +1,7 @@
 package implementaciones_extras;
 
 public abstract class Indicador {
-
+	
 	protected int id;
 	protected double longitud;
 	protected double latitud;

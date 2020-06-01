@@ -3,13 +3,20 @@ package model.data_structures;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import implementaciones_extras.BFS;
+import implementaciones_extras.Prim;
+
 
 
 public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 {
+	public static final int DIRIGIDO = 0;
+	public static final int NODIRIGIDO = 1;
+	private int tipo;
+
 	private int V;
 	private int E;
-	private SeparateChainingHashST<K, Vertice<K,V>> vertices;
+	public SeparateChainingHashST<K, Vertice<K,V>> vertices;
 	private SeparateChainingHashST<String, Arco<K,A>> arcos;
 
 	public Graph(int v)
@@ -32,6 +39,11 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 		return E;
 	}
 
+	public int darTipo()
+	{
+		return tipo;
+	}
+
 	@Override
 	public void addVertex(K id, V infoVertex) 
 	{
@@ -43,31 +55,61 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 
 	public void addEdge(K idVertIni, K idVertFin, A infoArc) throws Exception 
 	{
-		if(!vertices.contiene(idVertIni)||!vertices.contiene(idVertFin))
+		if(tipo == NODIRIGIDO)
 		{
-			throw new Exception("No existe alguno de los vertices en el grafo");
+			if(!vertices.contiene(idVertIni)||!vertices.contiene(idVertFin))
+			{
+				throw new Exception("No existe alguno de los vertices en el grafo");
+			}
+
+			Arco<K, A> nuevoArco = new Arco<K,A>(idVertIni, idVertFin, infoArc);
+			String key = idVertIni+"-"+idVertFin;
+			String keyInv = idVertFin+"-"+idVertIni;
+
+			if(arcos.contiene(key)||arcos.contiene(keyInv))
+			{
+
+			}
+
+			else
+			{
+				arcos.put(key, nuevoArco);
+				E++;
+				Vertice<K,V> verticeIni = vertices.get(idVertIni);
+				Vertice<K,V> verticeFin = vertices.get(idVertFin);
+
+				verticeIni.agregarVerticeAdj(idVertFin);
+				verticeFin.agregarVerticeAdj(idVertIni);
+			}
 		}
 
-		Arco<K, A> nuevoArco = new Arco<K,A>(idVertIni, idVertFin, infoArc);
-		String key = idVertIni+"-"+idVertFin;
-		String keyInv = idVertFin+"-"+idVertIni;
-
-		if(arcos.contiene(key)||arcos.contiene(keyInv))
+		else if(tipo==DIRIGIDO)
 		{
+			if(!vertices.contiene(idVertIni)||!vertices.contiene(idVertFin))
+			{
+				throw new Exception("No existe alguno de los vertices en el grafo");
+			}
 
+			Arco<K, A> nuevoArco = new Arco<K,A>(idVertIni, idVertFin, infoArc);
+			String key = idVertIni+"-"+idVertFin;
+
+			if(arcos.contiene(key))
+			{
+
+			}
+
+			else
+			{
+				arcos.put(key, nuevoArco);
+				E++;
+				Vertice<K,V> verticeIni = vertices.get(idVertIni);
+
+				verticeIni.agregarVerticeAdj(idVertFin);
+			}
 		}
 
-		else
-		{
-			arcos.put(key, nuevoArco);
-			E++;
-			Vertice<K,V> verticeIni = vertices.get(idVertIni);
-			Vertice<K,V> verticeFin = vertices.get(idVertFin);
-
-			verticeIni.agregarVerticeAdj(idVertFin);
-			verticeFin.agregarVerticeAdj(idVertIni);
-		}
 	}
+
 	@Override
 	public V getInfoVertex(K idVertex) 
 	{	
@@ -87,19 +129,34 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 	public A getInfoArc(K idVertIni, K idVertFin) 
 	{
 		A info = null;
-		String key = idVertIni+"-"+idVertFin;
-		String keyInv = idVertFin+"-"+idVertIni;
-
-		if(arcos.contiene(key))
+		if(tipo==NODIRIGIDO)
 		{
-			Arco<K,A> arc = arcos.get(key);
-			info = arc.darInfo();
+			String key = idVertIni+"-"+idVertFin;
+			String keyInv = idVertFin+"-"+idVertIni;
+
+			if(arcos.contiene(key))
+			{
+				Arco<K,A> arc = arcos.get(key);
+				info = arc.darInfo();
+			}
+
+			else if(arcos.contiene(keyInv))
+			{
+				Arco<K,A> arc = arcos.get(keyInv);
+				info = arc.darInfo();
+			}
 		}
 
-		else if(arcos.contiene(keyInv))
+		else if(tipo==DIRIGIDO)
 		{
-			Arco<K,A> arc = arcos.get(keyInv);
-			info = arc.darInfo();
+			String key = idVertIni+"-"+idVertFin;
+
+			if(arcos.contiene(key))
+			{
+				Arco<K,A> arc = arcos.get(key);
+				info = arc.darInfo();
+			}
+
 		}
 
 		return info;
@@ -133,7 +190,8 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 		return arcos.keys();
 	}
 
-	public Iterable<Arco<K,A>> arcos() {
+	public Iterable<Arco<K,A>> arcos() 
+	{
 		Queue<Arco<K,A>> lista = new Queue<>();
 
 		Iterator<String> iter = arcos.keys();
@@ -144,5 +202,112 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 			lista.enqueue(arco);
 		}
 		return lista;
+	}
+
+	public void eliminarVertice(K key) 
+	{
+		vertices.delete(key);
+		V--;
+	}
+
+	public boolean existeVertice(K key) 
+	{
+		if(vertices.get(key)!=null) {
+			return true;
+		}
+		else {return false;
+		}
+	}
+
+	public Arco<K,A> getArc(K idVertIni, K idVertFin)
+	{
+		Arco<K,A> arco = null;
+		if(tipo==NODIRIGIDO)
+		{
+			String key = idVertIni+"-"+idVertFin;
+			String keyInv = idVertFin+"-"+idVertIni;
+
+			if(arcos.contiene(key))
+			{
+				arco = arcos.get(key);
+			}
+
+			else if(arcos.contiene(keyInv))
+			{
+				arco = arcos.get(keyInv);
+
+			}
+		}
+
+		else if(tipo==DIRIGIDO)
+		{
+			String key = idVertIni+"-"+idVertFin;
+
+			if(arcos.contiene(key))
+			{
+				arco = arcos.get(key);
+			}
+		}
+
+		return arco;
+	}
+
+	public Graph<K,V,A> reves() 
+	{
+		Graph<K,V,A> reverse = new Graph<K,V,A>(0);
+
+		Iterator<String > iter = iterarArcos();
+		while(iter.hasNext())
+		{
+			Arco<K,A> arc = this.arcos.get(iter.next());
+
+			try 
+			{
+				K v1 = arc.darPrimerVertice();
+				K v2 = arc.darSegundoVertice();
+
+				if(!reverse.vertices.contiene(v1))
+				{
+					reverse.addVertex(v1, this.getInfoVertex(v1));
+				}
+
+				if(!reverse.vertices.contiene(v2))
+				{
+					reverse.addVertex(v2, this.getInfoVertex(v2));
+				}
+
+				reverse.addEdge(arc.darSegundoVertice(), arc.darPrimerVertice(), arc.darInfo());
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		System.out.println(reverse.E);
+		System.out.println(this.E);
+		return reverse;
+	}
+
+	public BFS<K,V,A> bfs(K s)
+	{
+		return new BFS<K, V, A>(this, s);
+	}
+
+	public int Grado(K v)
+	{
+		int grado=0;
+
+		Iterator<String> iter = arcos.keys();
+		while(iter.hasNext())
+		{
+			String key = iter.next();
+			if(key.contains(String.valueOf(v)))
+			{
+				grado++;
+			}
+		}
+
+
+		return grado;
 	}
 }

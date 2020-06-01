@@ -15,8 +15,9 @@ public class View
 
 	public void printMenu()
 	{
-		System.out.println("0. Cargar datos.");
+		System.out.println("0. Cargar datos prueba.");
 		System.out.println("1. Cargar Grafo.");
+		System.out.println("2. Red de comunicacion (comparendos mayor gravedad).");
 
 	}
 
