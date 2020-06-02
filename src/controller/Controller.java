@@ -51,7 +51,8 @@ public class Controller {
 		double loi = 0;
 		double lf = 0;
 		double lof = 0;
-		
+		long tiempoI=0;
+
 		Scanner lector = new Scanner(System.in);
 		boolean fin = false;
 
@@ -64,8 +65,12 @@ public class Controller {
 			case 0:
 				modelo = new Modelo(); 
 				try {
+					tiempoI = System.nanoTime();
 					modelo.loadData();
 					modelo.cargarGraph();
+					long tiempoF = System.nanoTime();
+					double demora = (tiempoF - tiempoI)/ 1e6;
+					System.out.println("Tiempo de demora: "+ demora);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no carga");
@@ -73,6 +78,7 @@ public class Controller {
 
 			case 1:
 				try {
+					tiempoI = System.nanoTime();
 					System.out.println("--------- \nm Latitud inicial: ");
 					li = lector.nextInt();
 					System.out.println("--------- \nm longitud inicial: ");
@@ -81,29 +87,35 @@ public class Controller {
 					lf = lector.nextInt();
 					System.out.println("--------- \nm longitud final: ");
 					lof = lector.nextInt();
-					
+
 					modelo.caminoCostoMinimo(li, loi, lf, lof);
-					
+					long tiempoF = System.nanoTime();
+					double demora = (tiempoF - tiempoI)/ 1e6;
+					System.out.println("Tiempo de demora: "+ demora);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no calcula el costo");
 				}
 				break;
-				
+
 			case 2:
 				try {
+					tiempoI = System.nanoTime();
 					modelo.loadComparendos(RUTA_COMPARENDOS);
 					System.out.println("--------- \nm Comparendos: ");
 					s = lector.nextInt();
 					modelo.redComunicacion(s);
+					long tiempoF = System.nanoTime();
+					double demora = (tiempoF - tiempoI)/ 1e6;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no carga el grafo");
 				}
 				break;
-				
+
 			case 3:
 				try {
+					tiempoI = System.nanoTime();
 					System.out.println("--------- \nm Latitud inicial: ");
 					li = lector.nextInt();
 					System.out.println("--------- \nm longitud inicial: ");
@@ -112,21 +124,30 @@ public class Controller {
 					lf = lector.nextInt();
 					System.out.println("--------- \nm longitud final: ");
 					lof = lector.nextInt();
-					
+
 					modelo.caminoCostoMinimoPorComparendos(li, loi, lf, lof);
-					
+					long tiempoF = System.nanoTime();
+					double demora = (tiempoF - tiempoI)/ 1e6;
+					System.out.println("Tiempo de demora: "+ demora);
+
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no calcula el costo");
 				}
 				break;
-				
+
 			case 4:
+
 				try {
+					tiempoI = System.nanoTime();
 					modelo.loadComparendos(RUTA_COMPARENDOS);
 					System.out.println("--------- \nm Comparendos: ");
 					s = lector.nextInt();
-					modelo.redComunicacionNumero(s);
+					modelo.caminosCortosPolicia(s);
+					long tiempoF = System.nanoTime();
+					double demora = (tiempoF - tiempoI)/ 1e6;
+
+					System.out.println("Tiempo de demora: "+ demora);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("no carga el grafo");

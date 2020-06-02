@@ -135,7 +135,7 @@ public class Modelo {
 				}
 
 				Graph.addEdge(Graph.V() - 1, interseccionAConectar.darId(), menorDistancia);
-				grafoPolicia.addEdge(Graph.V() - 1, interseccionAConectar.darId(), menorDistancia);
+				
 				numeroArcosMixtos++;
 
 			}
