@@ -143,6 +143,24 @@ public class Controller {
 					modelo.loadComparendos(RUTA_COMPARENDOS);
 					System.out.println("--------- \nm Comparendos: ");
 					s = lector.nextInt();
+					modelo.redComunicacionNumero(s);
+					long tiempoF = System.nanoTime();
+					double demora = (tiempoF - tiempoI)/ 1e6;
+
+					System.out.println("Tiempo de demora: "+ demora);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("no carga el grafo");
+				}
+				break;
+				
+			case 5:
+
+				try {
+					tiempoI = System.nanoTime();
+					modelo.loadComparendos(RUTA_COMPARENDOS);
+					System.out.println("--------- \nm Comparendos: ");
+					s = lector.nextInt();
 					modelo.caminosCortosPolicia(s);
 					long tiempoF = System.nanoTime();
 					double demora = (tiempoF - tiempoI)/ 1e6;
