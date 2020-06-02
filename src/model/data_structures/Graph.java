@@ -18,6 +18,8 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 	private int E;
 	public SeparateChainingHashST<K, Vertice<K,V>> vertices;
 	private SeparateChainingHashST<String, Arco<K,A>> arcos;
+	
+
 
 	public Graph(int v)
 	{
@@ -310,4 +312,6 @@ public class Graph <K extends Comparable<K>, V, A> implements IGraph<K,V,A>
 
 		return grado;
 	}
+	
+
 }

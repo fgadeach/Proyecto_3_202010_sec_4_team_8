@@ -47,6 +47,11 @@ public class Controller {
 	public void run() 
 	{
 		int s =0;
+		double li = 0;
+		double loi = 0;
+		double lf = 0;
+		double lof = 0;
+		
 		Scanner lector = new Scanner(System.in);
 		boolean fin = false;
 
@@ -68,10 +73,20 @@ public class Controller {
 
 			case 1:
 				try {
-					modelo.cargarGraph();
+					System.out.println("--------- \nm Latitud inicial: ");
+					li = lector.nextInt();
+					System.out.println("--------- \nm longitud inicial: ");
+					loi = lector.nextInt();
+					System.out.println("--------- \nm Latitud final: ");
+					lf = lector.nextInt();
+					System.out.println("--------- \nm longitud final: ");
+					lof = lector.nextInt();
+					
+					modelo.caminoCostoMinimo(li, loi, lf, lof);
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					System.out.println("no carga el grafo");
+					System.out.println("no calcula el costo");
 				}
 				break;
 				
@@ -86,7 +101,37 @@ public class Controller {
 					System.out.println("no carga el grafo");
 				}
 				break;
-
+				
+			case 3:
+				try {
+					System.out.println("--------- \nm Latitud inicial: ");
+					li = lector.nextInt();
+					System.out.println("--------- \nm longitud inicial: ");
+					loi = lector.nextInt();
+					System.out.println("--------- \nm Latitud final: ");
+					lf = lector.nextInt();
+					System.out.println("--------- \nm longitud final: ");
+					lof = lector.nextInt();
+					
+					modelo.caminoCostoMinimoPorComparendos(li, loi, lf, lof);
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("no calcula el costo");
+				}
+				break;
+				
+			case 4:
+				try {
+					modelo.loadComparendos(RUTA_COMPARENDOS);
+					System.out.println("--------- \nm Comparendos: ");
+					s = lector.nextInt();
+					modelo.redComunicacionNumero(s);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("no carga el grafo");
+				}
+				break;
 
 			default: 
 				System.out.println("--------- \n Opcion Invalida !! \n---------");

@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.json.simple.JSONArray;
@@ -45,7 +46,8 @@ public class Modelo {
 
 	private Graph<Integer, Indicador , Double> Graph = new Graph<Integer,Indicador , Double>(1);
 
-	private Graph<Integer, Indicador , Double> GraphComparendos = new Graph<Integer,Indicador , Double>(0);
+	private Graph<Integer, Policia, Double> grafoPolicia = new Graph<Integer, Policia, Double>(0);
+
 	private ArbolRojoNegro<String,Comparendos> listaComparendos = new ArbolRojoNegro<>();
 	private ArbolRojoNegro<String,Comparendos> listaComparendosMayorGravedad = new ArbolRojoNegro<>();
 
@@ -105,6 +107,7 @@ public class Modelo {
 				Policia vert = new Policia (Integer.parseInt(String.valueOf(comp.get("id"))),latitud,longitud);
 
 				Graph.addVertex(Graph.V(), vert);
+				grafoPolicia.addVertex(Graph.V(), vert);
 
 				numeroVerticesvertice++;
 
@@ -132,6 +135,7 @@ public class Modelo {
 				}
 
 				Graph.addEdge(Graph.V() - 1, interseccionAConectar.darId(), menorDistancia);
+				grafoPolicia.addEdge(Graph.V() - 1, interseccionAConectar.darId(), menorDistancia);
 				numeroArcosMixtos++;
 
 			}
@@ -162,7 +166,7 @@ public class Modelo {
 				double longitud = Double.parseDouble(datos[1]);
 				double latitud = Double.parseDouble(datos[2]);
 				Interseccion interseccion = new Interseccion(id, latitud, longitud);
-				Vertice vert = new Vertice (id, interseccion);
+				Vertice<Integer, Interseccion> vert = new Vertice<Integer, Interseccion> (id, interseccion);
 
 				Graph.addVertex(id, interseccion);
 
@@ -523,30 +527,98 @@ public class Modelo {
 
 
 		Iterator<Integer> iter = vertices.keys();
+
+		File file = new File("1A.html");
+
+		PrintWriter pr = new PrintWriter(file);
+		pr.println(" <!DOCTYPE html>\n" +
+				"<html>\n" +
+				"  <head>\n" +
+				"    <title>Mapa</title>\n" +
+				"    <meta name=\"viewport\" content=\"initial-scale=1.0\">\n" +
+				"    <meta charset=\"utf-8\">\n" +
+				"    <style>\n" +
+				"      /* Always set the map height explicitly to define the size of the div\n" +
+				"       * element that contains the map. */\n" +
+				"      #map {\n" +
+				"        height: 100%;\n" +
+				"      }\n" +
+				"      /* Optional: Makes the sample page fill the window. */\n" +
+				"      html, body \n" +
+				"      {\n" +
+				"        height: 100%;\n" +
+				"        margin: 0;\n" +
+				"        padding: 0;\n" +
+				"      }\n" +
+				"    </style> \n" +
+				"  </head> \n" +
+				"  <body> \n" +
+				"    <div id=\"map\"></div> \n" +
+				"    <script> \n");	
+		pr.println(" function initMap() {\n"+
+				"    var map = new google.maps.Map(document.getElementById('map'), {\n"+
+				"      zoom: 12,\n"+
+				"      center: {lat: 4.647956, lng: -74.083781},\n"+
+				"      mapTypeId: 'terrain'\n"+
+				"    });\n");
+
 		while(iter.hasNext())
 		{
-			Vertice station = vertices.get(iter.next());
+			Vertice vertex = vertices.get(iter.next());
 
-			double distanciaInicio = Haversine.distance(latitudIni, longitudIni, station.darLatitud(), station.darLongitud());
-			double distanciaFin = Haversine.distance(latitudFin, longitudFin, station.darLatitud(), station.darLongitud());
+			double distanciaInicio = Haversine.distance(latitudIni, longitudIni, vertex.darLatitud(), vertex.darLongitud());
+			double distanciaFin = Haversine.distance(latitudFin, longitudFin, vertex.darLatitud(), vertex.darLongitud());
 
 			if(distanciaInicio<distanciaMinimaverticeInicio)
 			{
 				distanciaMinimaverticeInicio = distanciaInicio;
-				verticeMasCercanaInicio = station;
+				verticeMasCercanaInicio = vertex;
 			}
 
 			if(distanciaFin<distanciaMinimaverticeFin)
 			{
 				distanciaMinimaverticeFin = distanciaFin;
-				verticeMasCercanaFin = station;
+				verticeMasCercanaFin = vertex;
 			}
 		}
+
+		pr.println(
+				"          var cityCircle = new google.maps.Circle({\r\n" + 
+						"            strokeColor: '#FF0000',\r\n" + 
+						"            strokeOpacity: 0.8,\r\n" + 
+						"            strokeWeight: 2,\r\n" + 
+						"            fillColor: '#FF0000',\r\n" + 
+						"            fillOpacity: 0.35,\r\n" + 
+						"            map: map,\r\n" + 
+						"            center: {lat:"+latitudIni+",lng:"+longitudIni+"},\r\n" + 
+						"            radius:"+ 10 +"\r\n" + 
+						"          });\r\n"+
+				"cityCircle.setMap(map);");
+		pr.println(
+				"          var cityCircle = new google.maps.Circle({\r\n" + 
+						"            strokeColor: '#FF0000',\r\n" + 
+						"            strokeOpacity: 0.8,\r\n" + 
+						"            strokeWeight: 2,\r\n" + 
+						"            fillColor: '#FF0000',\r\n" + 
+						"            fillOpacity: 0.35,\r\n" + 
+						"            map: map,\r\n" + 
+						"            center: {lat:"+ latitudFin+",lng:"+longitudFin+"},\r\n" + 
+						"            radius:"+ 10 +"\r\n" + 
+						"          });\r\n"+
+				"cityCircle.setMap(map);");
 
 		Dijkstra<Integer, Indicador, Double> d = new Dijkstra<Integer, Indicador, Double>(Graph, (int) verticeMasCercanaInicio.darKey());
 
 		masCorto = new Camino<Arco<Integer,Double>>(d.pathTo((int)verticeMasCercanaFin.darKey()), d.distTo((int)verticeMasCercanaFin.darKey()), 
 				verticeMasCercanaInicio, verticeMasCercanaFin);	
+
+		pr.println("}\n");
+		pr.println("  </script>\n" +"<script async defer     src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyB4IQ2SrwpoZ_6fs9jOngVXxHNU1CtVK3g&callback=initMap\">");
+		pr.println("</script>");
+		pr.println("</body>");
+		pr.println("</html>");
+		pr.close();
+		java.awt.Desktop.getDesktop().browse(file.toURI());
 
 		return masCorto;
 	}
@@ -608,16 +680,16 @@ public class Modelo {
 				"      center: {lat: 4.647956, lng: -74.083781},\n"+
 				"      mapTypeId: 'terrain'\n"+
 				"    });\n");
-		
-		
+
+
 		Iterator<Integer> iter2 = Graph.iterarVertices();
 		while(iter2.hasNext()) 
 		{
 			int id = iter2.next();
-	
+
 			Vertice vert = Graph.vertices.get(id);
-		
-			
+
+
 			if(vert.hasComparendos()&&id!=not) 
 			{
 				masCorto = new Camino<Arco<Integer,Double>>(d.pathTo((int)vert.darKey()), d.distTo((int)vert.darKey()), verticeIni, vert);
@@ -643,7 +715,7 @@ public class Modelo {
 		pr.println("</html>");
 		pr.close();
 		java.awt.Desktop.getDesktop().browse(file.toURI());
-		
+
 		if(pesoTotal!=0) 
 		{
 			System.out.println("Peso Total: " + pesoTotal + " Costo Total: " + pesoTotal*10000+"$");
@@ -654,6 +726,364 @@ public class Modelo {
 		}
 	}
 
+	public Camino<Arco<Integer,Double>> caminoCostoMinimoPorComparendos(double latitudIni, double longitudIni, double latitudFin, double longitudFin) throws Exception
+	{
+
+		cargarComparendosMayorGravedadVertice(1000);
+
+		Camino <Arco<Integer,Double>> masCorto = null;
+		Vertice verticeMasCercanaInicio=null;
+		Vertice verticeMasCercanaFin=null;
+
+		double pesoMinimoIni = 0;
+		double pesoMinimoFin = 0;
+
+
+		int costoInicial = 0;
+		int costoFinal = 0;
+		Iterator<Integer> iter = vertices.keys();
+
+		File file = new File("2B.html");
+
+		PrintWriter pr = new PrintWriter(file);
+		pr.println(" <!DOCTYPE html>\n" +
+				"<html>\n" +
+				"  <head>\n" +
+				"    <title>Mapa</title>\n" +
+				"    <meta name=\"viewport\" content=\"initial-scale=1.0\">\n" +
+				"    <meta charset=\"utf-8\">\n" +
+				"    <style>\n" +
+				"      /* Always set the map height explicitly to define the size of the div\n" +
+				"       * element that contains the map. */\n" +
+				"      #map {\n" +
+				"        height: 100%;\n" +
+				"      }\n" +
+				"      /* Optional: Makes the sample page fill the window. */\n" +
+				"      html, body \n" +
+				"      {\n" +
+				"        height: 100%;\n" +
+				"        margin: 0;\n" +
+				"        padding: 0;\n" +
+				"      }\n" +
+				"    </style> \n" +
+				"  </head> \n" +
+				"  <body> \n" +
+				"    <div id=\"map\"></div> \n" +
+				"    <script> \n");	
+		pr.println(" function initMap() {\n"+
+				"    var map = new google.maps.Map(document.getElementById('map'), {\n"+
+				"      zoom: 12,\n"+
+				"      center: {lat: 4.647956, lng: -74.083781},\n"+
+				"      mapTypeId: 'terrain'\n"+
+				"    });\n");
+
+		while(iter.hasNext())
+		{
+			Vertice vertex = vertices.get(iter.next());
+			Interseccion inter = (Interseccion) vertex.darValue();
+			if(inter.darLatitud()==latitudIni && inter.darLongitud()==longitudIni) 
+			{
+				verticeMasCercanaInicio = vertex;
+			}
+			if(inter.darLatitud()==latitudFin && inter.darLongitud()==longitudFin) 
+			{
+				verticeMasCercanaFin = vertex;
+			}	
+
+			double pesoIni = verticeMasCercanaInicio.darRadio();
+			double pesoFin = verticeMasCercanaFin.darRadio();
+
+
+			if(pesoIni<pesoMinimoIni)
+			{
+				pesoMinimoIni = pesoIni;
+				verticeMasCercanaInicio = vertex;
+			}
+
+			if(pesoFin<pesoMinimoFin)
+			{
+				pesoMinimoFin = pesoFin;
+				verticeMasCercanaFin = vertex;
+			}
+		}	
+
+
+		Dijkstra<Integer, Indicador, Double> d = new Dijkstra<Integer, Indicador, Double>(Graph, (int) verticeMasCercanaInicio.darKey());
+		
+		pr.println(
+				"          var cityCircle = new google.maps.Circle({\r\n" + 
+						"            strokeColor: '#FF0000',\r\n" + 
+						"            strokeOpacity: 0.8,\r\n" + 
+						"            strokeWeight: 2,\r\n" + 
+						"            fillColor: '#FF0000',\r\n" + 
+						"            fillOpacity: 0.35,\r\n" + 
+						"            map: map,\r\n" + 
+						"            center: {lat:"+latitudIni+",lng:"+longitudIni+"},\r\n" + 
+						"            radius:"+ 10 +"\r\n" + 
+						"          });\r\n"+
+				"cityCircle.setMap(map);");
+		
+		pr.println(
+				"          var cityCircle = new google.maps.Circle({\r\n" + 
+						"            strokeColor: '#FF0000',\r\n" + 
+						"            strokeOpacity: 0.8,\r\n" + 
+						"            strokeWeight: 2,\r\n" + 
+						"            fillColor: '#FF0000',\r\n" + 
+						"            fillOpacity: 0.35,\r\n" + 
+						"            map: map,\r\n" + 
+						"            center: {lat:"+latitudFin+",lng:"+longitudFin+"},\r\n" + 
+						"            radius:"+ 10 +"\r\n" + 
+						"          });\r\n"+
+				"cityCircle.setMap(map);");
+		
+		masCorto = new Camino<Arco<Integer,Double>>(d.pathTo((int)verticeMasCercanaFin.darKey()), d.distTo((int)verticeMasCercanaFin.darKey()), 
+				verticeMasCercanaInicio, verticeMasCercanaFin);	
+
+		pr.println("}\n");
+		pr.println("  </script>\n" +"<script async defer     src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyB4IQ2SrwpoZ_6fs9jOngVXxHNU1CtVK3g&callback=initMap\">");
+		pr.println("</script>");
+		pr.println("</body>");
+		pr.println("</html>");
+		pr.close();
+		java.awt.Desktop.getDesktop().browse(file.toURI());
+		
+		return masCorto;
+	}
+
+
+	public void redComunicacionNumero(int m) throws Exception
+	{
+		Camino <Arco<Integer,Double>> masCorto = null;
+
+		cargarComparendosMayorGravedadVertice(1000);
+
+
+		double pesoTotal = 0;
+		int not = -1000;
+		Iterator<Integer> iter = Graph.iterarVertices();
+		int other = -1000;
+
+		ArrayList<Integer> vertic = new ArrayList<Integer>();
+
+		while(iter.hasNext()&& m>0) 
+		{
+			int id = iter.next();
+			Vertice vert = Graph.vertices.get(id);
+
+			if(vert.hasComparendos()) 
+			{	
+				vertic.add(id);
+				not = id;
+			}
+		}
+
+		Dijkstra<Integer, Indicador, Double> d = new Dijkstra<Integer, Indicador, Double>(Graph, not);
+
+		Vertice verticeIni = Graph.vertices.get(not);
+		File file = new File("2B.html");
+
+		PrintWriter pr = new PrintWriter(file);
+		pr.println(" <!DOCTYPE html>\n" +
+				"<html>\n" +
+				"  <head>\n" +
+				"    <title>Mapa</title>\n" +
+				"    <meta name=\"viewport\" content=\"initial-scale=1.0\">\n" +
+				"    <meta charset=\"utf-8\">\n" +
+				"    <style>\n" +
+				"      /* Always set the map height explicitly to define the size of the div\n" +
+				"       * element that contains the map. */\n" +
+				"      #map {\n" +
+				"        height: 100%;\n" +
+				"      }\n" +
+				"      /* Optional: Makes the sample page fill the window. */\n" +
+				"      html, body \n" +
+				"      {\n" +
+				"        height: 100%;\n" +
+				"        margin: 0;\n" +
+				"        padding: 0;\n" +
+				"      }\n" +
+				"    </style> \n" +
+				"  </head> \n" +
+				"  <body> \n" +
+				"    <div id=\"map\"></div> \n" +
+				"    <script> \n");	
+		pr.println(" function initMap() {\n"+
+				"    var map = new google.maps.Map(document.getElementById('map'), {\n"+
+				"      zoom: 12,\n"+
+				"      center: {lat: 4.647956, lng: -74.083781},\n"+
+				"      mapTypeId: 'terrain'\n"+
+				"    });\n");
+
+
+		Iterator<Integer> iter2 = vertic.iterator();
+		while(iter2.hasNext()) 
+		{
+			int id = iter2.next();
+
+			Vertice vert = Graph.vertices.get(id);
+
+
+			if(vert.hasComparendos()&&id!=not) 
+			{
+				masCorto = new Camino<Arco<Integer,Double>>(d.pathTo((int)vert.darKey()), d.distTo((int)vert.darKey()), verticeIni, vert);
+
+				pr.println(
+						"          var cityCircle = new google.maps.Circle({\r\n" + 
+								"            strokeColor: '#FF0000',\r\n" + 
+								"            strokeOpacity: 0.8,\r\n" + 
+								"            strokeWeight: 2,\r\n" + 
+								"            fillColor: '#FF0000',\r\n" + 
+								"            fillOpacity: 0.35,\r\n" + 
+								"            map: map,\r\n" + 
+								"            center: {lat:"+Graph.getInfoVertex(id).darLatitud()+",lng:"+Graph.getInfoVertex(id).darLongitud()+"},\r\n" + 
+								"            radius:"+ vert.darRadio() +"\r\n" + 
+								"          });\r\n"+
+						"cityCircle.setMap(map);");
+			}	
+		}
+		pr.println("}\n");
+		pr.println("  </script>\n" +"<script async defer     src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyB4IQ2SrwpoZ_6fs9jOngVXxHNU1CtVK3g&callback=initMap\">");
+		pr.println("</script>");
+		pr.println("</body>");
+		pr.println("</html>");
+		pr.close();
+		java.awt.Desktop.getDesktop().browse(file.toURI());
+
+		if(pesoTotal!=0) 
+		{
+			System.out.println("Peso Total: " + pesoTotal + " Costo Total: " + pesoTotal*10000+"$");
+		}
+		else 
+		{
+			System.out.println("No hay conexion entre el vertice origen: " + verticeIni.darValue() + " Y los demas vertices");
+		}	
+	}
+
+	public void caminosCortosPolicia(int m) throws IOException 
+	{
+
+		cargarComparendosMayorGravedadVertice(m);
+
+		Iterator<Integer> iterw = Graph.iterarVertices();
+		int not = -1000;
+		int other = -1000;
+
+		ArrayList<Integer> vertic = new ArrayList<Integer>();
+
+		while(iterw.hasNext()&& m>0) 
+		{
+			int id = iterw.next();
+			Vertice vert = Graph.vertices.get(id);
+
+			if(vert.hasComparendos()) 
+			{	
+				vertic.add(id);
+				not = id;
+			}
+		}
+
+		Iterator<Integer> iter2 = vertic.iterator();
+
+		File file = new File("3A.html");
+
+		PrintWriter pr = new PrintWriter(file);
+		pr.println(" <!DOCTYPE html>\n" +
+				"<html>\n" +
+				"  <head>\n" +
+				"    <title>Mapa</title>\n" +
+				"    <meta name=\"viewport\" content=\"initial-scale=1.0\">\n" +
+				"    <meta charset=\"utf-8\">\n" +
+				"    <style>\n" +
+				"      /* Always set the map height explicitly to define the size of the div\n" +
+				"       * element that contains the map. */\n" +
+				"      #map {\n" +
+				"        height: 100%;\n" +
+				"      }\n" +
+				"      /* Optional: Makes the sample page fill the window. */\n" +
+				"      html, body \n" +
+				"      {\n" +
+				"        height: 100%;\n" +
+				"        margin: 0;\n" +
+				"        padding: 0;\n" +
+				"      }\n" +
+				"    </style> \n" +
+				"  </head> \n" +
+				"  <body> \n" +
+				"    <div id=\"map\"></div> \n" +
+				"    <script> \n");	
+		pr.println(" function initMap() {\n"+
+				"    var map = new google.maps.Map(document.getElementById('map'), {\n"+
+				"      zoom: 12,\n"+
+				"      center: {lat: 4.647956, lng: -74.083781},\n"+
+				"      mapTypeId: 'terrain'\n"+
+				"    });\n");
+		while(iter2.hasNext()) 
+		{
+			Camino <Arco<Integer,Double>> masCorto = null;
+
+			Policia masCercano = null;
+
+			int idm = masCercano.darId();
+
+			int ids =iter2.next();
+
+			Iterator<Integer> iter = grafoPolicia.vertices.keys();
+
+
+			while(iter.hasNext()) 
+			{
+				int id = iter.next();
+				Policia presente = grafoPolicia.getInfoVertex(id);
+
+				Dijkstra<Integer, Indicador, Double> mC = new Dijkstra<Integer, Indicador, Double>(Graph, id);
+				Dijkstra<Integer, Indicador, Double> p = new Dijkstra<Integer, Indicador, Double>(Graph, idm);
+
+				if(mC.distTo(ids)<p.distTo(ids))
+				{
+					masCercano = presente;
+					idm = presente.darId();
+					masCorto = new Camino<Arco<Integer,Double>>(p.pathTo(ids), p.distTo(ids), Graph.vertices.get(idm), Graph.vertices.get(ids));
+				}
+
+			}
+			pr.println(
+					"          var cityCircle = new google.maps.Circle({\r\n" + 
+							"            strokeColor: '#FF0000',\r\n" + 
+							"            strokeOpacity: 0.8,\r\n" + 
+							"            strokeWeight: 2,\r\n" + 
+							"            fillColor: '#FF0000',\r\n" + 
+							"            fillOpacity: 0.35,\r\n" + 
+							"            map: map,\r\n" + 
+							"            center: {lat:"+Graph.getInfoVertex(idm).darLatitud()+",lng:"+Graph.getInfoVertex(idm).darLongitud()+"},\r\n" + 
+							"            radius:"+ 10 +"\r\n" + 
+							"          });\r\n"+
+					"cityCircle.setMap(map);");
+
+			pr.println(
+					"          var cityCircle = new google.maps.Circle({\r\n" + 
+							"            strokeColor: '#FF0000',\r\n" + 
+							"            strokeOpacity: 0.8,\r\n" + 
+							"            strokeWeight: 2,\r\n" + 
+							"            fillColor: '#FF0000',\r\n" + 
+							"            fillOpacity: 0.35,\r\n" + 
+							"            map: map,\r\n" + 
+							"            center: {lat:"+Graph.getInfoVertex(ids).darLatitud()+",lng:"+Graph.getInfoVertex(ids).darLongitud()+"},\r\n" + 
+							"            radius:"+ 10 +"\r\n" + 
+							"          });\r\n"+
+					"cityCircle.setMap(map);");
+
+
+			System.out.println("Policia mas cercano: " + masCercano.darId());
+			System.out.println(masCorto.getPasos());
+		}
+		pr.println("}\n");
+		pr.println("  </script>\n" +"<script async defer     src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyB4IQ2SrwpoZ_6fs9jOngVXxHNU1CtVK3g&callback=initMap\">");
+		pr.println("</script>");
+		pr.println("</body>");
+		pr.println("</html>");
+		pr.close();
+		java.awt.Desktop.getDesktop().browse(file.toURI());
+	}
 }
 
 
